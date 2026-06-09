@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Automation Society — Where automations shine & you win</title>
+  <meta name="description" content="The community and platform for building production-grade AI automations. Launch workflows, deploy intelligent agents, and win the Spotlight." />
+
+  <link rel="icon" href="brand_assets/logo-mark.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Montserrat per brand guidelines (single typeface: bold headers, medium body) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Spline web-component viewer (vanilla equivalent of @splinetool/react-spline) -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer/build/spline-viewer.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base: '#0E0B07',
+            surface: '#1A140D',
+            card: '#221A10',
+            gold: { DEFAULT: '#D6B36A', light: '#E6B979', dark: '#C6A559', spark: '#FBE9B8' },
+            ink: '#F6F0E6',
+            muted: '#B6AC99',
+          },
+          fontFamily: { sans: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          maxWidth: { shell: '1400px' },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { --gold-grad: linear-gradient(135deg, #C6A559 0%, #E6B979 50%, #FBE9B8 100%); --hairline: rgba(230,185,121,0.18); --hairline-strong: rgba(230,185,121,0.34); }
+
+    body { background: #0E0B07; color: #B6AC99; font-family: "Montserrat", sans-serif; font-weight: 500; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    .display { font-weight: 800; letter-spacing: -0.03em; line-height: 0.96; color: #F6F0E6; overflow-wrap: break-word; }
+    .eyebrow { font-weight: 600; text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.72rem; }
+    .gold-text { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .diamond::before { content: "◆"; font-size: 0.7em; margin-right: 0.6em; color: #E6B979; vertical-align: middle; }
+
+    /* Atmosphere: layered gold glows + grain */
+    .atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(55% 45% at 50% -8%, rgba(230,185,121,0.14), transparent 70%), radial-gradient(40% 40% at 88% 6%, rgba(198,165,89,0.10), transparent 65%); }
+    .grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.05; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    /* Pill buttons (brand: gradient gold primary, gold outline secondary) */
+    .pill { display: inline-flex; align-items: center; gap: 0.6rem; border-radius: 9999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; padding: 0.95rem 1.8rem; line-height: 1;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), background-color .3s, color .3s, box-shadow .3s, border-color .3s; }
+    .pill-gold { color: #2A1E08; background: var(--gold-grad); box-shadow: 0 1px 0 rgba(251,233,184,.6) inset, 0 12px 26px -10px rgba(198,165,89,.55); }
+    .pill-gold:hover { transform: translateY(-2px) scale(1.015); box-shadow: 0 1px 0 rgba(251,233,184,.7) inset, 0 18px 36px -10px rgba(230,185,121,.6); }
+    .pill-gold:active { transform: translateY(0) scale(.99); }
+    .pill-outline { color: #E6B979; border: 1.5px solid var(--hairline-strong); background: rgba(230,185,121,.04); }
+    .pill-outline:hover { background: rgba(230,185,121,.12); border-color: rgba(230,185,121,.6); color: #FBE9B8; transform: translateY(-2px); }
+    .pill-dark { color: #F6F0E6; background: rgba(14,11,7,.7); border: 1px solid var(--hairline-strong); }
+    .pill-dark:hover { transform: translateY(-2px); color: #FBE9B8; border-color: rgba(230,185,121,.6); }
+    .pill:focus-visible { outline: 3px solid #E6B979; outline-offset: 3px; }
+
+    .track { position: absolute; inset: 0; display: grid; place-items: center; }
+    .track > span { position: absolute; border: 1.5px solid rgba(230,185,121,.14); border-radius: 9999px; }
+
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    .cat-row { transition: color .3s, padding-left .35s cubic-bezier(.22,1,.36,1); color: #F6F0E6; }
+    .cat-row .arrow { opacity: 0; transform: translateX(-12px); transition: opacity .3s, transform .35s cubic-bezier(.22,1,.36,1); color: #E6B979; }
+    .cat-row:hover { padding-left: 1.25rem; }
+    .cat-row:hover .display { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cat-row:hover .arrow { opacity: 1; transform: none; }
+
+    .marquee { display: flex; gap: 3rem; white-space: nowrap; animation: scroll 24s linear infinite; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
+
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; } .marquee, .spotlight { animation: none !important; } .spotlight { opacity: 1 !important; transform: none !important; } .pill { transition: none !important; } }
+    html.noanim .reveal { opacity: 1 !important; transform: none !important; }
+    html.noanim .marquee { animation: none !important; }
+    html.noanim .spotlight { animation: none !important; opacity: 1 !important; transform: none !important; }
+
+    /* Spline 3D animated background */
+    .spline-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .spline-bg::part(logo) { display: none; } /* hide Spline badge where supported */
+
+    /* Suspense-equivalent loader (matches the React fallback's .loader) */
+    .loader { position: absolute; inset: 0; margin: auto; width: 46px; height: 46px; border-radius: 50%;
+      border: 3px solid rgba(230,185,121,.22); border-top-color: #E6B979; animation: spin .9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Spotlight glow (brand-gold adaptation of the aceternity Spotlight) */
+    .spotlight { position: absolute; pointer-events: none; z-index: 0; top: -25%; left: -10%;
+      width: 75%; height: 140%; filter: blur(46px); opacity: 0;
+      background: radial-gradient(closest-side, rgba(230,185,121,.20), rgba(198,165,89,.08) 55%, transparent 75%);
+      animation: spotlight 2.2s cubic-bezier(.22,1,.36,1) .15s forwards; }
+    @keyframes spotlight { from { opacity: 0; transform: translate(-40px,-40px) scale(.85); } to { opacity: 1; transform: none; } }
+
+    ::selection { background: rgba(230,185,121,.3); color: #FBE9B8; }
+    ::-webkit-scrollbar { width: 12px; }
+    ::-webkit-scrollbar-track { background: #0E0B07; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(#C6A559,#7a5f24); border: 3px solid #0E0B07; border-radius: 9999px; }
+  </style>
+</head>
+
+<body>
+  <div class="atmosphere"></div>
+  <div class="grain"></div>
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-50 bg-base/85 backdrop-blur border-b" style="border-color:var(--hairline)">
+    <div class="mx-auto max-w-shell px-5 sm:px-8 h-[68px] flex items-center justify-between relative z-10">
+      <a href="#top" class="flex items-center gap-2.5 select-none">
+        <img src="brand_assets/logo-mark.png" alt="AI Automation Society" class="h-9 w-9 object-contain drop-shadow-[0_4px_10px_rgba(198,165,89,.45)]" />
+        <span class="font-bold tracking-tight text-ink text-[14px] leading-none">AI Automation<br /><span class="text-muted font-semibold text-[12px]">Society</span></span>
+      </a>
+      <nav class="hidden lg:flex items-center gap-8 eyebrow text-white/60">
+        <a href="#apps" class="hover:text-ink transition-colors">Apps</a>
+        <a href="#spotlight" class="hover:text-ink transition-colors">Spotlight</a>
+        <a href="#explore" class="hover:text-ink transition-colors">Community</a>
+        <a href="#build" class="hover:text-ink transition-colors">Build</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="#" class="pill pill-outline !py-2.5 !px-5 hidden sm:inline-flex">Learn More</a>
+        <a href="#" class="pill pill-gold !py-2.5 !px-5">Join</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="relative z-10">
+    <!-- ============ HERO ============ -->
+    <section class="px-3 sm:px-4 pt-3 sm:pt-4">
+      <div class="relative overflow-hidden rounded-[28px] sm:rounded-[40px] border" style="border-color:var(--hairline); background:radial-gradient(120% 120% at 50% -10%, #2A2012 0%, #1A140D 45%, #0E0B07 100%);">
+        <!-- thumbnail strip -->
+        <div class="flex gap-2.5 p-3 sm:p-4 overflow-hidden">
+          <img src="https://placehold.co/300x180/0E0B07/E6B979?text=WORKFLOWS" alt="" class="h-20 sm:h-28 w-full object-cover rounded-2xl flex-1 min-w-0" />
+          <img src="https://placehold.co/300x180/1A140D/C6A559?text=AI+AGENTS" alt="" class="h-20 sm:h-28 w-full object-cover rounded-2xl flex-1 min-w-0 hidden xs:block" />
+          <img src="https://placehold.co/300x180/221A10/FBE9B8?text=INTEGRATIONS" alt="" class="h-20 sm:h-28 w-full object-cover rounded-2xl flex-1 min-w-0 hidden sm:block" />
+          <img src="https://placehold.co/300x180/0E0B07/E6B979?text=ANALYTICS" alt="" class="h-20 sm:h-28 w-full object-cover rounded-2xl flex-1 min-w-0 hidden md:block" />
+          <img src="https://placehold.co/300x180/1A140D/C6A559?text=TEMPLATES" alt="" class="h-20 sm:h-28 w-full object-cover rounded-2xl flex-1 min-w-0 hidden lg:block" />
+        </div>
+
+        <!-- marquee bar -->
+        <div class="border-y py-2.5 overflow-hidden" style="border-color:var(--hairline); background:rgba(14,11,7,.4)">
+          <div class="marquee eyebrow text-gold-light/80">
+            <span>◆ BUILD PRODUCTION-GRADE AI AUTOMATIONS</span><span>◆ AI AGENTS</span><span>◆ INTEGRATIONS</span><span>◆ TEMPLATES</span><span>◆ JOIN 9,000+ OPERATORS</span><span>◆ WIN THE SPOTLIGHT</span>
+            <span>◆ BUILD PRODUCTION-GRADE AI AUTOMATIONS</span><span>◆ AI AGENTS</span><span>◆ INTEGRATIONS</span><span>◆ TEMPLATES</span><span>◆ JOIN 9,000+ OPERATORS</span><span>◆ WIN THE SPOTLIGHT</span>
+          </div>
+        </div>
+
+        <!-- launch -->
+        <div class="relative h-[360px] sm:h-[440px] grid place-items-center overflow-hidden">
+          <!-- Spotlight glow + animated 3D Spline scene behind the hero text -->
+          <div class="spotlight" aria-hidden="true"></div>
+          <div class="absolute inset-0 z-0" aria-hidden="true">
+            <span class="loader"></span>
+            <spline-viewer class="spline-bg" url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" loading-anim-type="none"></spline-viewer>
+          </div>
+          <div class="track z-0" aria-hidden="true">
+            <span style="width:200px;height:120px"></span>
+            <span style="width:320px;height:190px"></span>
+            <span style="width:460px;height:270px"></span>
+            <span style="width:620px;height:360px"></span>
+            <span style="width:800px;height:460px"></span>
+            <span style="width:1000px;height:560px"></span>
+          </div>
+          <div class="relative z-10 text-center px-4">
+            <p class="eyebrow text-muted mb-5">Your gateway to the automation ecosystem</p>
+            <a href="#" class="pill pill-gold !px-10 !py-5 !text-base scale-110">
+              Get Started
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- app icon row -->
+        <div class="flex items-center justify-between gap-4 px-4 sm:px-6 pb-5">
+          <a href="#apps" class="eyebrow text-ink inline-flex items-center gap-1.5 hover:gap-2.5 transition-all">See all apps
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <div class="flex gap-2">
+            <img src="https://placehold.co/64x64/0E0B07/E6B979?text=1" class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl border" style="border-color:var(--hairline)" alt="" />
+            <img src="https://placehold.co/64x64/1A140D/C6A559?text=2" class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl border" style="border-color:var(--hairline)" alt="" />
+            <img src="https://placehold.co/64x64/221A10/FBE9B8?text=3" class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl border" style="border-color:var(--hairline)" alt="" />
+            <img src="https://placehold.co/64x64/1A140D/E6B979?text=4" class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl border hidden xs:block" style="border-color:var(--hairline)" alt="" />
+            <img src="https://placehold.co/64x64/0E0B07/C6A559?text=5" class="h-9 w-9 sm:h-11 sm:w-11 rounded-xl border hidden sm:block" style="border-color:var(--hairline)" alt="" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SPOTLIGHT ============ -->
+    <section id="spotlight" class="mx-auto max-w-shell px-5 sm:px-8 py-20 sm:py-28">
+      <p class="eyebrow diamond text-muted reveal">Society Spotlight</p>
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 mt-6 items-center">
+        <div class="reveal">
+          <h2 class="display text-[3rem] sm:text-[4.5rem] xl:text-[5.25rem]">Where automations<br />shine <span class="gold-text">&amp; you win</span></h2>
+          <p class="mt-7 max-w-md text-muted text-[15px] leading-relaxed">
+            Spotlight is broken into rounds, each one tailored to a featured automation. The winning build earns elevated visibility across the Society — while rewarding the members who ship and share their best work.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#" class="pill pill-gold">Get Started</a>
+            <a href="#" class="pill pill-outline">Get Spotlight</a>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <div class="relative rounded-[28px] overflow-hidden border bg-base aspect-[4/3]" style="border-color:var(--hairline); background:radial-gradient(90% 90% at 30% 20%, rgba(230,185,121,.16), transparent 60%), #0E0B07;">
+            <div class="absolute inset-0 grid place-items-center">
+              <span class="display gold-text text-[3.5rem] sm:text-[5rem] drop-shadow-[0_0_30px_rgba(230,185,121,.45)]">FlowPilot</span>
+            </div>
+            <div class="absolute inset-0" style="background:repeating-linear-gradient(0deg, transparent 0 22px, rgba(230,185,121,.05) 22px 23px);"></div>
+            <a href="#" class="pill pill-dark absolute bottom-4 left-4 !py-3 !px-5 !text-[11px]">What's this
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APPS ============ -->
+    <section id="apps" class="mx-auto max-w-shell px-5 sm:px-8 pb-20 sm:pb-28">
+      <div class="flex items-end justify-between gap-4 reveal">
+        <p class="eyebrow diamond text-muted">Society Apps</p>
+        <a href="#" class="eyebrow text-ink inline-flex items-center gap-1.5 hover:gap-2.5 transition-all">See all apps
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-7">
+        <!-- card 1 -->
+        <article class="reveal group rounded-[24px] overflow-hidden border bg-card transition-colors" style="border-color:var(--hairline)">
+          <div class="relative h-52 overflow-hidden">
+            <img src="https://placehold.co/600x340/1A140D/E6B979?text=WORKFLOW+STUDIO" alt="" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <span class="absolute top-3 left-3 h-10 w-10 rounded-xl grid place-items-center text-base font-bold" style="background:var(--gold-grad)">W</span>
+          </div>
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="display text-xl">Workflow Studio</h3>
+              <span class="eyebrow text-muted border rounded-full px-2.5 py-1" style="border-color:var(--hairline)">Automation</span>
+            </div>
+            <p class="mt-2 text-[13.5px] text-muted">Drag-and-drop builder with branching logic, retries, and scheduling — idea to live flow in minutes.</p>
+          </div>
+        </article>
+        <!-- card 2 -->
+        <article class="reveal group rounded-[24px] overflow-hidden border bg-card transition-colors" style="border-color:var(--hairline)">
+          <div class="relative h-52 overflow-hidden">
+            <img src="https://placehold.co/600x340/221A10/C6A559?text=AI+AGENTS" alt="" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <span class="absolute top-3 left-3 h-10 w-10 rounded-xl grid place-items-center text-base font-bold" style="background:var(--gold-grad)">A</span>
+          </div>
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="display text-xl">AI Agents</h3>
+              <span class="eyebrow text-muted border rounded-full px-2.5 py-1" style="border-color:var(--hairline)">Agents</span>
+            </div>
+            <p class="mt-2 text-[13.5px] text-muted">Deploy reasoning agents that read context, decide, and act across your stack — safely.</p>
+          </div>
+        </article>
+        <!-- card 3 -->
+        <article class="reveal group rounded-[24px] overflow-hidden border bg-card transition-colors" style="border-color:var(--hairline)">
+          <div class="relative h-52 overflow-hidden">
+            <img src="https://placehold.co/600x340/0E0B07/FBE9B8?text=TEMPLATE+VAULT" alt="" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <span class="absolute top-3 left-3 h-10 w-10 rounded-xl grid place-items-center text-base font-bold" style="background:var(--gold-grad)">T</span>
+          </div>
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <h3 class="display text-xl">Template Vault</h3>
+              <span class="eyebrow text-muted border rounded-full px-2.5 py-1" style="border-color:var(--hairline)">Templates</span>
+            </div>
+            <p class="mt-2 text-[13.5px] text-muted">Clone 200+ vetted, member-built blueprints and launch proven automations instantly.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ CATEGORIES ============ -->
+    <section id="explore" class="bg-surface rounded-[28px] sm:rounded-[40px] mx-3 sm:mx-4 border" style="border-color:var(--hairline)">
+      <div class="mx-auto max-w-shell px-5 sm:px-10 py-16 sm:py-24">
+        <p class="eyebrow diamond text-muted reveal">Explore the ecosystem</p>
+        <div class="mt-8 divide-y" style="--tw-divide-opacity:1; border-color:var(--hairline)">
+          <a href="#" class="cat-row flex items-center gap-4 py-3 sm:py-4 border-t-0" style="border-color:var(--hairline)">
+            <svg class="arrow shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="display text-[2.4rem] sm:text-[4.5rem] xl:text-[5.5rem]">Workflow Automation</span>
+          </a>
+          <a href="#" class="cat-row flex items-center gap-4 py-3 sm:py-4" style="border-color:var(--hairline)">
+            <svg class="arrow shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="display text-[2.4rem] sm:text-[4.5rem] xl:text-[5.5rem]">AI Agents</span>
+          </a>
+          <a href="#" class="cat-row flex items-center gap-4 py-3 sm:py-4" style="border-color:var(--hairline)">
+            <svg class="arrow shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="display text-[2.4rem] sm:text-[4.5rem] xl:text-[5.5rem]">Integrations</span>
+          </a>
+          <a href="#" class="cat-row flex items-center gap-4 py-3 sm:py-4" style="border-color:var(--hairline)">
+            <svg class="arrow shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="display text-[2.4rem] sm:text-[4.5rem] xl:text-[5.5rem]">Analytics</span>
+          </a>
+          <a href="#" class="cat-row flex items-center gap-4 py-3 sm:py-4" style="border-color:var(--hairline)">
+            <svg class="arrow shrink-0" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7M17 7H8M17 7v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="display text-[2.4rem] sm:text-[4.5rem] xl:text-[5.5rem]">Community</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FOOTER / BUILD ============ -->
+    <footer id="build" class="text-ink mt-3 sm:mt-4 rounded-t-[28px] sm:rounded-t-[40px] border-t" style="border-color:var(--hairline); background:linear-gradient(180deg,#1A140D,#0E0B07);">
+      <div class="mx-auto max-w-shell px-5 sm:px-10 pt-16 sm:pt-24 pb-8">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div>
+            <h4 class="eyebrow diamond text-muted mb-5">Build with the Society</h4>
+            <ul class="space-y-3 text-[15px] text-muted">
+              <li><a href="#" class="hover:text-gold-light transition-colors">Docs</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Member Hub</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Template Vault</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">API Reference</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="eyebrow diamond text-muted mb-5">Society</h4>
+            <ul class="space-y-3 text-[15px] text-muted">
+              <li><a href="#" class="hover:text-gold-light transition-colors">Twitter / X</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Discord</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Events Calendar</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Office Hours</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="eyebrow diamond text-muted mb-5">Company</h4>
+            <ul class="space-y-3 text-[15px] text-muted">
+              <li><a href="#" class="hover:text-gold-light transition-colors">About</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Careers</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Security</a></li>
+              <li><a href="#" class="hover:text-gold-light transition-colors">Status</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="eyebrow diamond text-muted mb-5">Get the latest</h4>
+            <p class="text-[14px] text-muted mb-4">Join the newsletter for ecosystem drops and Spotlight rounds.</p>
+            <form class="flex gap-2" onsubmit="return false">
+              <input type="email" placeholder="you@email.com" class="min-w-0 flex-1 bg-white/5 border rounded-full px-4 py-2.5 text-[14px] text-ink placeholder-muted/50 focus:outline-none" style="border-color:var(--hairline-strong)" />
+              <button class="pill pill-gold !px-5 !py-2.5">Go</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="mt-14 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] eyebrow text-muted/60 border-t pt-6" style="border-color:var(--hairline)">
+          <p>© 2026 AI Automation Society</p>
+          <div class="flex gap-6">
+            <a href="#" class="hover:text-ink transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-ink transition-colors">Privacy Policy</a>
+          </div>
+        </div>
+
+        <!-- giant wordmark -->
+        <div class="mt-10 -mb-2 text-center">
+          <img src="brand_assets/logo-mark.png" alt="" class="h-16 w-16 object-contain mx-auto mb-4 drop-shadow-[0_8px_20px_rgba(198,165,89,.5)]" />
+          <h2 class="display gold-text leading-none" style="font-size:clamp(2.4rem, 11vw, 9.5rem);">AI AUTOMATION SOCIETY</h2>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    if (location.search.includes('noanim')) document.documentElement.classList.add('noanim');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>

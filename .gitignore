@@ -1,0 +1,14 @@
+# Dev artifacts
+temporary screenshots/
+*.log
+
+# Reference material (not part of the site)
+apechain.com_.png
+
+# Dependencies / build
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

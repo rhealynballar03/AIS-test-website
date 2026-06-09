@@ -77,10 +77,13 @@
     .marquee { display: flex; gap: 3rem; white-space: nowrap; animation: scroll 24s linear infinite; }
     @keyframes scroll { to { transform: translateX(-50%); } }
 
-    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; } .marquee, .spotlight { animation: none !important; } .spotlight { opacity: 1 !important; transform: none !important; } .pill { transition: none !important; } }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; } .marquee, .spotlight, .glitch-inner, .glitch-text::before, .glitch-text::after { animation: none !important; } .spotlight { opacity: 1 !important; transform: none !important; } .glitch-text::before, .glitch-text::after { display: none !important; } .glow-cta { animation: none !important; box-shadow: 0 1px 0 rgba(251,233,184,.7) inset, 0 0 28px rgba(251,233,184,.7), 0 0 60px rgba(230,185,121,.4) !important; } .pill { transition: none !important; } }
     html.noanim .reveal { opacity: 1 !important; transform: none !important; }
     html.noanim .marquee { animation: none !important; }
     html.noanim .spotlight { animation: none !important; opacity: 1 !important; transform: none !important; }
+    html.noanim .glitch-inner { animation: none !important; }
+    html.noanim .glitch-text::before, html.noanim .glitch-text::after { display: none !important; }
+    html.noanim .glow-cta { animation: none !important; box-shadow: 0 1px 0 rgba(251,233,184,.7) inset, 0 0 28px rgba(251,233,184,.7), 0 0 60px rgba(230,185,121,.4) !important; }
 
     /* Spline 3D animated background */
     .spline-bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -97,6 +100,49 @@
       background: radial-gradient(closest-side, rgba(230,185,121,.20), rgba(198,165,89,.08) 55%, transparent 75%);
       animation: spotlight 2.2s cubic-bezier(.22,1,.36,1) .15s forwards; }
     @keyframes spotlight { from { opacity: 0; transform: translate(-40px,-40px) scale(.85); } to { opacity: 1; transform: none; } }
+
+    /* Glitch effect for the hero CTA — occasional RGB-split tear + positional jitter */
+    .glitch-inner { display: inline-flex; align-items: center; gap: 0.6rem; animation: glitch-jitter 3.6s infinite steps(1); }
+    @keyframes glitch-jitter {
+      0%, 12%, 16%, 48%, 52%, 100% { transform: translate(0, 0); }
+      13% { transform: translate(-2px, 1px); }
+      14% { transform: translate(2px, -1px); }
+      15% { transform: translate(-1px, 0); }
+      49% { transform: translate(1px, -1px); }
+      50% { transform: translate(-2px, 1px); }
+      51% { transform: translate(1px, 0); }
+    }
+    .glitch-text { position: relative; display: inline-block; }
+    .glitch-text::before, .glitch-text::after {
+      content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      color: #2A1E08; overflow: hidden; pointer-events: none; clip-path: inset(0 0 100% 0);
+    }
+    .glitch-text::before { text-shadow: -1.6px 0 #ff2d6b; animation: glitch-clip-a 3.6s infinite steps(1); }
+    .glitch-text::after  { text-shadow: 1.6px 0 #00d5ff; animation: glitch-clip-b 3.6s infinite steps(1); }
+    @keyframes glitch-clip-a {
+      0%, 12%, 16%, 48%, 52%, 100% { clip-path: inset(0 0 100% 0); transform: translate(0,0); }
+      13% { clip-path: inset(0 0 62% 0); transform: translateX(-2px); }
+      14% { clip-path: inset(45% 0 30% 0); transform: translateX(2px); }
+      15% { clip-path: inset(20% 0 55% 0); transform: translateX(-1px); }
+      49% { clip-path: inset(58% 0 12% 0); transform: translateX(-2px); }
+      50% { clip-path: inset(10% 0 70% 0); transform: translateX(2px); }
+    }
+    @keyframes glitch-clip-b {
+      0%, 12%, 16%, 48%, 52%, 100% { clip-path: inset(0 0 100% 0); transform: translate(0,0); }
+      13% { clip-path: inset(55% 0 18% 0); transform: translateX(2px); }
+      14% { clip-path: inset(15% 0 60% 0); transform: translateX(-2px); }
+      15% { clip-path: inset(70% 0 8% 0); transform: translateX(1px); }
+      49% { clip-path: inset(12% 0 62% 0); transform: translateX(2px); }
+      50% { clip-path: inset(48% 0 28% 0); transform: translateX(-2px); }
+    }
+
+    /* Pulsing gold glow for the hero CTA */
+    .glow-cta { animation: cta-glow 2.4s ease-in-out infinite; }
+    @keyframes cta-glow {
+      0%, 100% { box-shadow: 0 1px 0 rgba(251,233,184,.6) inset, 0 0 16px rgba(230,185,121,.55), 0 0 38px rgba(230,185,121,.3); }
+      50%      { box-shadow: 0 1px 0 rgba(251,233,184,.75) inset, 0 0 30px rgba(251,233,184,.9), 0 0 70px rgba(230,185,121,.55), 0 0 110px rgba(198,165,89,.35); }
+    }
+    .glow-cta:hover { animation-duration: 1.4s; }
 
     ::selection { background: rgba(230,185,121,.3); color: #FBE9B8; }
     ::-webkit-scrollbar { width: 12px; }
@@ -168,9 +214,11 @@
           </div>
           <div class="relative z-10 text-center px-4">
             <p class="eyebrow text-muted mb-5">Your gateway to the automation ecosystem</p>
-            <a href="#" class="pill pill-gold !px-10 !py-5 !text-base scale-110">
-              Get Started
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <a href="#" class="pill pill-gold glow-cta !px-10 !py-5 !text-base scale-110">
+              <span class="glitch-inner">
+                <span class="glitch-text" data-text="Get Started">Get Started</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
             </a>
           </div>
         </div>
